@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tính Tỷ Lệ Tiêu Hóa Dưỡng Chất | Dinh Dưỡng Chăn Nuôi</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #0f766e 0%, #065f46 50%, #064e3b 100%);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        .input-field {
+            transition: all 0.3s ease;
+        }
+        
+        .input-field:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.3);
+        }
+        
+        .result-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .result-card:hover {
+            transform: translateY(-5px) scale(1.02);
+        }
+        
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .progress-ring {
+            transition: stroke-dashoffset 1s ease-in-out;
+        }
+        
+        .tooltip {
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .tooltip-trigger:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .pulse-dot {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="min-h-screen gradient-bg">
+    <!-- Header -->
+    <header class="pt-8 pb-4 px-4">
+        <div class="max-w-6xl mx-auto text-center">
+            <div class="inline-flex items-center gap-3 mb-4">
+                <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center animate-float">
+                    <i class="fas fa-flask text-3xl text-white"></i>
+                </div>
+                <h1 class="text-3xl md:text-4xl font-bold text-white">
+                    Tính Tỷ Lệ Tiêu Hóa Dưỡng Chất
+                </h1>
+            </div>
+            <p class="text-emerald-100 text-lg max-w-2xl mx-auto">
+                Công cụ chuyên nghiệp dành cho chuyên gia dinh dưỡng chăn nuôi thú y
+            </p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="px-4 pb-12">
+        <div class="max-w-6xl mx-auto">
+            <!-- Info Banner -->
+            <div class="bg-white/10 backdrop-blur rounded-2xl p-4 mb-8 flex items-center gap-4">
+                <div class="w-10 h-10 bg-amber-400 rounded-full flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-lightbulb text-amber-800"></i>
+                </div>
+                <p class="text-white text-sm md:text-base">
+                    <strong>Công thức:</strong> Tỷ lệ tiêu hóa (%) = [(Lượng ăn vào - Lượng thải ra) / Lượng ăn vào] × 100
+                </p>
+            </div>
+
+            <!-- Input Section -->
+            <div class="glass-card rounded-3xl p-6 md:p-8 mb-8">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-edit text-emerald-600"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-gray-800">Nhập Dữ Liệu</h2>
+                    <div class="ml-auto flex gap-2">
+                        <button onclick="loadSampleData()" class="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-100 transition">
+                            <i class="fas fa-database mr-1"></i> Dữ liệu mẫu
+                        </button>
+                        <button onclick="clearAll()" class="px-4 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100 transition">
+                            <i class="fas fa-trash mr-1"></i> Xóa
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Animal Selection -->
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-paw mr-2 text-emerald-500"></i>Loại vật nuôi
+                    </label>
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                        <button onclick="selectAnimal(this, 'cattle')" class="animal-btn px-4 py-3 border-2 border-gray-200 rounded-xl text-center hover:border-emerald-400 transition">
+                            <i class="fas fa-cow text-2xl mb-1 text-gray-600"></i>
+                            <div class="text-sm font-medium">Bò</div>
+                        </button>
+                        <button onclick="selectAnimal(this, 'pig')" class="animal-btn px-4 py-3 border-2 border-gray-200 rounded-xl text-center hover:border-emerald-400 transition">
+                            <i class="fas fa-piggy-bank text-2xl mb-1 text-gray-600"></i>
+                            <div class="text-sm font-medium">Heo</div>
+                        </button>
+                        <button onclick="selectAnimal(this, 'goat')" class="animal-btn px-4 py-3 border-2 border-gray-200 rounded-xl text-center hover:border-emerald-400 transition">
+                            <i class="fas fa-horse text-2xl mb-1 text-gray-600"></i>
+                            <div class="text-sm font-medium">Dê/Cừu</div>
+                        </button>
+                        <button onclick="selectAnimal(this, 'poultry')" class="animal-btn px-4 py-3 border-2 border-gray-200 rounded-xl text-center hover:border-emerald-400 transition">
+                            <i class="fas fa-egg text-2xl mb-1 text-gray-600"></i>
+                            <div class="text-sm font-medium">Gia cầm</div>
+                        </button>
+                        <button onclick="selectAnimal(this, 'other')" class="animal-btn px-4 py-3 border-2 border-gray-200 rounded-xl text-center hover:border-emerald-400 transition">
+                            <i class="fas fa-paw text-2xl mb-1 text-gray-600"></i>
+                            <div class="text-sm font-medium">Khác</div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Input Tables -->
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Feed Intake -->
+                    <div class="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-5">
+                        <div class="flex items-center gap-2 mb-4">
+                            <div class="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-arrow-down text-white text-sm"></i>
+                            </div>
+                            <h3 class="font-bold text-emerald-800">Lượng Ăn Vào (g/ngày)</h3>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="tooltip-trigger relative">
+                                <label class="block text-xs font-medium text-gray-600 mb-1">DM - Vật chất khô</label>
+                                <input type="number" id="dm_in" step="0.01" placeholder="0.00" 
+                                    class="input-field w-full px-4 py-3 border-2 border-emerald-200 rounded-xl focus:border-emerald-500 focus:outline-none">
+                                <div class="tooltip absolute -top-12 left-0 bg-gray-800 text-white text-xs px-3 py-2 rounded-lg z-10">
+                                    Dry Matter - Tổng lượng vật chất khô trong thức ăn
+                                </div>
+                            </div>
+                            <div class="tooltip-trigger relative">
+                                <label class="block text-xs font-medium text-gray-600 mb-1">OM - Vật chất hữu cơ</label>
+                                <input type="number" id="om_in" step="0.01" placeholder="0.00" 
+                                    class="input-field w-full px-4 py-3 border-2 border-emerald-200 rounded-xl focus:border-emerald-500 focus:outline-none">
+                                <div class="tooltip absolute -top-12 left-0 bg-gray-800 text-white text-xs px-3 py-2 rounded-lg z-10">
+                                    Organic Matter - Vật chất hữu cơ = DM - Khoáng tổng số
+                                </div>
+                            </div>
+                            <div class="tooltip-trigger relative">
+                                <label class="block text-xs font-medium text-gray-600 mb-1">CP - Protein thô</label>
+                                <input type="number" id="cp_in" step="0.01" placeholder="0.00" 
+                                    class="input-field w-full px-4 py-3 border-2 border-emerald-200 rounded-xl focus:border-emerald-500 focus:outline-none">
+                                <div class="tooltip absolute -top-12 left-0 bg-gray-800 text-white text-xs px-3 py-2 rounded-lg z-10">
+                                    Crude Protein - Tổng lượng protein trong thức ăn
+                                </div>
+                            </div>
+                            <div class="tooltip-trigger relative">
+                                <label class="block text-xs font-medium text-gray-600 mb-1">NDF - Xơ trung tính</label>
+                                <input type="number" id="ndf_in" step="0.01" placeholder="0.00" 
+                                    class="input-field w-full px-4 py-3 border-2 border-emerald-200 rounded-xl focus:border-emerald-500 focus:outline-none">
+                                <div class="tooltip absolute -top-12 left-0 bg-gray-800 text-white text-xs px-3 py-2 rounded-lg z-10">
+                                    Neutral Detergent Fiber - Thành phần vách tế bào thực vật
+                                </div>
+                            </div>
+                            <div class="tooltip-trigger relative">
+                                <label class="block text-xs font-medium text-gray-600 mb-1">ADF - Xơ acid</label>
+                                <input type="number" id="adf_in" step="0.01" placeholder="0.00" 
+                                    class="input-field w-full px-4 py-3 border-2 border-emerald-200 rounded-xl focus:border-emerald-500 focus:outline-none">
+                                <div class="tooltip absolute -top-12 left-0 bg-gray-800 text-white text-xs px-3 py-2 rounded-lg z-10">
+                                    Acid Detergent Fiber - Cellulose + Lignin
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fecal Output -->
+                    <div class="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl p-5">
+                        <div class="flex items-center gap-2 mb-4">
+                            <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-arrow-up text-white text-sm"></i>
+                            </div>
+                            <h3 class="font-bold text-orange-800">Lượng Thải Ra (g/ngày)</h3>
+                        </div>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">DM - Vật chất khô</label>
+                                <input type="number" id="dm_out" step="0.01" placeholder="0.00" 
+                                    class="input-field w-full px-4 py-3 border-2 border-orange-200 rounded-xl focus:border-orange-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">OM - Vật chất hữu cơ</label>
+                                <input type="number" id="om_out" step="0.01" placeholder="0.00" 
+                                    class="input-field w-full px-4 py-3 border-2 border-orange-200 rounded-xl focus:border-orange-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">CP - Protein thô</label>
+                                <input type="number" id="cp_out" step="0.01" placeholder="0.00" 
+                                    class="input-field w-full px-4 py-3 border-2 border-orange-200 rounded-xl focus:border-orange-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">NDF - Xơ trung tính</label>
+                                <input type="number" id="ndf_out" step="0.01" placeholder="0.00" 
+                                    class="input-field w-full px-4 py-3 border-2 border-orange-200 rounded-xl focus:border-orange-500 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">ADF - Xơ acid</label>
+                                <input type="number" id="adf_out" step="0.01" placeholder="0.00" 
+                                    class="input-field w-full px-4 py-3 border-2 border-orange-200 rounded-xl focus:border-orange-500 focus:outline-none">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calculate Button -->
+                <div class="mt-8 text-center">
+                    <button onclick="calculate()" 
+                        class="px-12 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-lg rounded-2xl hover:from-emerald-700 hover:to-teal-700 transform hover:scale-105 transition-all shadow-lg hover:shadow-xl">
+                        <i class="fas fa-calculator mr-2"></i>
+                        Tính Tỷ Lệ Tiêu Hóa
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div id="results" class="hidden">
+                <div class="glass-card rounded-3xl p-6 md:p-8 mb-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-chart-pie text-purple-600"></i>
+                            </div>
+                            <h2 class="text-xl font-bold text-gray-800">Kết Quả Tỷ Lệ Tiêu Hóa</h2>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="exportResults()" class="px-4 py-2 bg-green-50 text-green-600 rounded-lg text-sm font-medium hover:bg-green-100 transition">
+                                <i class="fas fa-file-excel mr-1"></i> Xuất Excel
+                            </button>
+                            <button onclick="printResults()" class="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-100 transition">
+                                <i class="fas fa-print mr-1"></i> In
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Result Cards -->
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+                        <div class="result-card bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-4 text-center text-white">
+                            <div class="text-sm font-medium opacity-90 mb-1">DM</div>
+                            <div class="text-3xl font-bold mb-1" id="result_dm">--</div>
+                            <div class="text-xs opacity-75">Vật chất khô</div>
+                            <div class="mt-2">
+                                <svg class="w-16 h-16 mx-auto" viewBox="0 0 36 36">
+                                    <path class="text-blue-300/30" stroke="currentColor" stroke-width="3" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                    <path id="ring_dm" class="progress-ring" stroke="white" stroke-width="3" stroke-linecap="round" fill="none" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="result-card bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-4 text-center text-white">
+                            <div class="text-sm font-medium opacity-90 mb-1">OM</div>
+                            <div class="text-3xl font-bold mb-1" id="result_om">--</div>
+                            <div class="text-xs opacity-75">Vật chất hữu cơ</div>
+                            <div class="mt-2">
+                                <svg class="w-16 h-16 mx-auto" viewBox="0 0 36 36">
+                                    <path class="text-emerald-300/30" stroke="currentColor" stroke-width="3" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                    <path id="ring_om" class="progress-ring" stroke="white" stroke-width="3" stroke-linecap="round" fill="none" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="result-card bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-4 text-center text-white">
+                            <div class="text-sm font-medium opacity-90 mb-1">CP</div>
+                            <div class="text-3xl font-bold mb-1" id="result_cp">--</div>
+                            <div class="text-xs opacity-75">Protein thô</div>
+                            <div class="mt-2">
+                                <svg class="w-16 h-16 mx-auto" viewBox="0 0 36 36">
+                                    <path class="text-purple-300/30" stroke="currentColor" stroke-width="3" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                    <path id="ring_cp" class="progress-ring" stroke="white" stroke-width="3" stroke-linecap="round" fill="none" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="result-card bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-4 text-center text-white">
+                            <div class="text-sm font-medium opacity-90 mb-1">NDF</div>
+                            <div class="text-3xl font-bold mb-1" id="result_ndf">--</div>
+                            <div class="text-xs opacity-75">Xơ trung tính</div>
+                            <div class="mt-2">
+                                <svg class="w-16 h-16 mx-auto" viewBox="0 0 36 36">
+                                    <path class="text-orange-300/30" stroke="currentColor" stroke-width="3" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                    <path id="ring_ndf" class="progress-ring" stroke="white" stroke-width="3" stroke-linecap="round" fill="none" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="result-card bg-gradient-to-br from-rose-500 to-rose-600 rounded-2xl p-4 text-center text-white">
+                            <div class="text-sm font-medium opacity-90 mb-1">ADF</div>
+                            <div class="text-3xl font-bold mb-1" id="result_adf">--</div>
+                            <div class="text-xs opacity-75">Xơ acid</div>
+                            <div class="mt-2">
+                                <svg class="w-16 h-16 mx-auto" viewBox="0 0 36 36">
+                                    <path class="text-rose-300/30" stroke="currentColor" stroke-width="3" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                    <path id="ring_adf" class="progress-ring" stroke="white" stroke-width="3" stroke-linecap="round" fill="none" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Table -->
+                    <div class="bg-gray-50 rounded-2xl p-4 overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b-2 border-gray-200">
+                                    <th class="text-left py-3 px-4 font-bold text-gray-700">Chỉ tiêu</th>
+                                    <th class="text-center py-3 px-4 font-bold text-gray-700">Ăn vào (g)</th>
+                                    <th class="text-center py-3 px-4 font-bold text-gray-700">Thải ra (g)</th>
+                                    <th class="text-center py-3 px-4 font-bold text-gray-700">Tiêu hóa (g)</th>
+                                    <th class="text-center py-3 px-4 font-bold text-gray-700">Tỷ lệ (%)</th>
+                                    <th class="text-center py-3 px-4 font-bold text-gray-700">Đánh giá</th>
+                                </tr>
+                            </thead>
+                            <tbody id="result_table">
+                                <!-- Results will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Evaluation Summary -->
+                    <div id="evaluation" class="mt-6 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl p-5">
+                        <h3 class="font-bold text-indigo-800 mb-3">
+                            <i class="fas fa-clipboard-check mr-2"></i>Nhận xét tổng hợp
+                        </h3>
+                        <div id="evaluation_text" class="text-gray-700 leading-relaxed"></div>
+                    </div>
+                </div>
+
+                <!-- History Section -->
+                <div class="glass-card rounded-3xl p-6 md:p-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-history text-indigo-600"></i>
+                            </div>
+                            <h2 class="text-xl font-bold text-gray-800">Lịch Sử Tính Toán</h2>
+                        </div>
+                        <button onclick="clearHistory()" class="px-4 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100 transition">
+                            <i class="fas fa-trash mr-1"></i> Xóa lịch sử
+                        </button>
+                    </div>
+                    <div id="history" class="space-y-3 max-h-64 overflow-y-auto">
+                        <p class="text-gray-500 text-center py-4">Chưa có lịch sử tính toán</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-6 text-center text-emerald-100">
+        <p class="text-sm">
+            <i class="fas fa-code mr-1"></i> 
+            Công cụ hỗ trợ nghiên cứu dinh dưỡng chăn nuôi thú y
+        </p>
+        <p class="text-xs mt-2 opacity-70">© 2024 - Nutrient Digestibility Calculator</p>
+    </footer>
+
+    <script>
+        let selectedAnimal = '';
+        let history = JSON.parse(localStorage.getItem('digestHistory') || '[]');
+
+        // Select animal
+        function selectAnimal(btn, animal) {
+            document.querySelectorAll('.animal-btn').forEach(b => {
+                b.classList.remove('border-emerald-500', 'bg-emerald-50');
+                b.classList.add('border-gray-200');
+            });
+            btn.classList.remove('border-gray-200');
+            btn.classList.add('border-emerald-500', 'bg-emerald-50');
+            selectedAnimal = animal;
+        }
+
+        // Load sample data
+        function loadSampleData() {
+            const samples = {
+                cattle: { dm_in: 8500, om_in: 7800, cp_in: 1200, ndf_in: 4500, adf_in: 2800,
+                         dm_out: 2800, om_out: 2400, cp_out: 350, ndf_out: 1800, adf_out: 1400 },
+                pig: { dm_in: 2500, om_in: 2300, cp_in: 450, ndf_in: 400, adf_in: 180,
+                      dm_out: 650, om_out: 550, cp_out: 90, ndf_out: 180, adf_out: 95 },
+                goat: { dm_in: 1200, om_in: 1100, cp_in: 180, ndf_in: 650, adf_in: 380,
+                       dm_out: 420, om_out: 370, cp_out: 55, ndf_out: 280, adf_out: 200 },
+                poultry: { dm_in: 120, om_in: 110, cp_in: 25, ndf_in: 15, adf_in: 8,
+                          dm_out: 35, om_out: 30, cp_out: 6, ndf_out: 8, adf_out: 5 },
+                other: { dm_in: 1000, om_in: 920, cp_in: 150, ndf_in: 400, adf_in: 220,
+                        dm_out: 320, om_out: 280, cp_out: 40, ndf_out: 160, adf_out: 110 }
+            };
+
+            const data = samples[selectedAnimal] || samples.cattle;
+            
+            document.getElementById('dm_in').value = data.dm_in;
+            document.getElementById('om_in').value = data.om_in;
+            document.getElementById('cp_in').value = data.cp_in;
+            document.getElementById('ndf_in').value = data.ndf_in;
+            document.getElementById('adf_in').value = data.adf_in;
+            document.getElementById('dm_out').value = data.dm_out;
+            document.getElementById('om_out').value = data.om_out;
+            document.getElementById('cp_out').value = data.cp_out;
+            document.getElementById('ndf_out').value = data.ndf_out;
+            document.getElementById('adf_out').value = data.adf_out;
+
+            // Auto-select cattle if no animal selected
+            if (!selectedAnimal) {
+                selectAnimal(document.querySelector('.animal-btn'), 'cattle');
+            }
+        }
+
+        // Clear all inputs
+        function clearAll() {
+            const inputs = ['dm_in', 'om_in', 'cp_in', 'ndf_in', 'adf_in', 
+                           'dm_out', 'om_out', 'cp_out', 'ndf_out', 'adf_out'];
+            inputs.forEach(id => document.getElementById(id).value = '');
+            document.getElementById('results').classList.add('hidden');
+        }
+
+        // Calculate digestibility
+        function calculate() {
+            const nutrients = ['dm', 'om', 'cp', 'ndf', 'adf'];
+            const names = {
+                dm: 'DM - Vật chất khô',
+                om: 'OM - Vật chất hữu cơ', 
+                cp: 'CP - Protein thô',
+                ndf: 'NDF - Xơ trung tính',
+                adf: 'ADF - Xơ acid'
+            };
+
+            const results = {};
+            let tableHTML = '';
+            let allValid = true;
+
+            nutrients.forEach(n => {
+                const intake = parseFloat(document.getElementById(`${n}_in`).value) || 0;
+                const output = parseFloat(document.getElementById(`${n}_out`).value) || 0;
+                
+                if (intake <= 0) {
+                    allValid = false;
+                    return;
+                }
+
+                const digested = intake - output;
+                const digestibility = ((digested / intake) * 100);
+                
+                results[n] = {
+                    intake,
+                    output,
+                    digested,
+                    digestibility: digestibility.toFixed(2)
+                };
+
+                // Evaluate
+                let evaluation, evalClass;
+                if (n === 'dm' || n === 'om') {
+                    if (digestibility >= 70) { evaluation = 'Tốt'; evalClass = 'text-green-600 bg-green-100'; }
+                    else if (digestibility >= 60) { evaluation = 'Khá'; evalClass = 'text-blue-600 bg-blue-100'; }
+                    else if (digestibility >= 50) { evaluation = 'Trung bình'; evalClass = 'text-yellow-600 bg-yellow-100'; }
+                    else { evaluation = 'Thấp'; evalClass = 'text-red-600 bg-red-100'; }
+                } else if (n === 'cp') {
+                    if (digestibility >= 75) { evaluation = 'Tốt'; evalClass = 'text-green-600 bg-green-100'; }
+                    else if (digestibility >= 65) { evaluation = 'Khá'; evalClass = 'text-blue-600 bg-blue-100'; }
+                    else if (digestibility >= 55) { evaluation = 'Trung bình'; evalClass = 'text-yellow-600 bg-yellow-100'; }
+                    else { evaluation = 'Thấp'; evalClass = 'text-red-600 bg-red-100'; }
+                } else {
+                    if (digestibility >= 55) { evaluation = 'Tốt'; evalClass = 'text-green-600 bg-green-100'; }
+                    else if (digestibility >= 45) { evaluation = 'Khá'; evalClass = 'text-blue-600 bg-blue-100'; }
+                    else if (digestibility >= 35) { evaluation = 'Trung bình'; evalClass = 'text-yellow-600 bg-yellow-100'; }
+                    else { evaluation = 'Thấp'; evalClass = 'text-red-600 bg-red-100'; }
+                }
+
+                tableHTML += `
+                    <tr class="border-b border-gray-200 hover:bg-gray-100">
+                        <td class="py-3 px-4 font-medium">${names[n]}</td>
+                        <td class="py-3 px-4 text-center">${intake.toFixed(2)}</td>
+                        <td class="py-3 px-4 text-center">${output.toFixed(2)}</td>
+                        <td class="py-3 px-4 text-center font-medium text-emerald-600">${digested.toFixed(2)}</td>
+                        <td class="py-3 px-4 text-center font-bold text-lg">${digestibility.toFixed(2)}%</td>
+                        <td class="py-3 px-4 text-center">
+                            <span class="px-3 py-1 rounded-full text-xs font-bold ${evalClass}">${evaluation}</span>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            if (!allValid) {
+                alert('Vui lòng nhập đầy đủ dữ liệu lượng ăn vào!');
+                return;
+            }
+
+            // Show results
+            document.getElementById('results').classList.remove('hidden');
+            document.getElementById('result_table').innerHTML = tableHTML;
+
+            // Update result cards with animation
+            nutrients.forEach(n => {
+                const value = parseFloat(results[n].digestibility);
+                document.getElementById(`result_${n}`).textContent = value.toFixed(1) + '%';
+                
+                // Animate progress ring
+                setTimeout(() => {
+                    document.getElementById(`ring_${n}`).style.strokeDasharray = `${value}, 100`;
+                }, 100);
+            });
+
+            // Generate evaluation text
+            const evalText = generateEvaluation(results);
+            document.getElementById('evaluation_text').innerHTML = evalText;
+
+            // Save to history
+            saveToHistory(results);
+
+            // Scroll to results
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function generateEvaluation(results) {
+            const dmDigest = parseFloat(results.dm.digestibility);
+            const cpDigest = parseFloat(results.cp.digestibility);
+            const ndfDigest = parseFloat(results.ndf.digestibility);
+
+            let text = '<ul class="list-disc list-inside space-y-2">';
+            
+            if (dmDigest >= 70) {
+                text += '<li><span class="text-green-600 font-semibold">Tỷ lệ tiêu hóa DM tốt (' + dmDigest.toFixed(1) + '%)</span> - Thức ăn có giá trị dinh dưỡng cao, phù hợp với vật nuôi.</li>';
+            } else if (dmDigest >= 60) {
+                text += '<li><span class="text-blue-600 font-semibold">Tỷ lệ tiêu hóa DM khá (' + dmDigest.toFixed(1) + '%)</span> - Thức ăn có chất lượng trung bình khá.</li>';
+            } else {
+                text += '<li><span class="text-red-600 font-semibold">Tỷ lệ tiêu hóa DM thấp (' + dmDigest.toFixed(1) + '%)</span> - Cần xem xét lại khẩu phần ăn hoặc chế biến thức ăn.</li>';
+            }
+
+            if (cpDigest >= 75) {
+                text += '<li><span class="text-green-600 font-semibold">Protein được tiêu hóa tốt (' + cpDigest.toFixed(1) + '%)</span> - Nguồn protein chất lượng cao.</li>';
+            } else if (cpDigest < 60) {
+                text += '<li><span class="text-red-600 font-semibold">Tiêu hóa protein thấp (' + cpDigest.toFixed(1) + '%)</span> - Cân nhắc bổ sung nguồn protein dễ tiêu hóa hơn.</li>';
+            }
+
+            if (ndfDigest >= 55) {
+                text += '<li><span class="text-green-600 font-semibold">Tiêu hóa xơ tốt (' + ndfDigest.toFixed(1) + '%)</span> - Hệ vi sinh vật dạ cỏ hoạt động hiệu quả.</li>';
+            } else if (ndfDigest < 40) {
+                text += '<li><span class="text-yellow-600 font-semibold">Tiêu hóa xơ thấp (' + ndfDigest.toFixed(1) + '%)</span> - Có thể do thức ăn thô già, nhiều lignin.</li>';
+            }
+
+            text += '</ul>';
+            return text;
+        }
+
+        function saveToHistory(results) {
+            const record = {
+                date: new Date().toLocaleString('vi-VN'),
+                animal: selectedAnimal || 'Không xác định',
+                dm: results.dm.digestibility,
+                om: results.om.digestibility,
+                cp: results.cp.digestibility,
+                ndf: results.ndf.digestibility,
+                adf: results.adf.digestibility
+            };
+
+            history.unshift(record);
+            if (history.length > 10) history.pop();
+            localStorage.setItem('digestHistory', JSON.stringify(history));
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('history');
+            if (history.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-4">Chưa có lịch sử tính toán</p>';
+                return;
+            }
+
+            const animalNames = {
+                cattle: 'Bò', pig: 'Heo', goat: 'Dê/Cừu', poultry: 'Gia cầm', other: 'Khác'
+            };
+
+            container.innerHTML = history.map((h, i) => `
+                <div class="bg-white rounded-xl p-4 border border-gray-100 hover:shadow-md transition">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <span class="text-sm font-semibold text-gray-800">${animalNames[h.animal] || h.animal}</span>
+                            <span class="text-xs text-gray-500 ml-2">${h.date}</span>
+                        </div>
+                        <button onclick="deleteHistory(${i})" class="text-red-400 hover:text-red-600">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="flex flex-wrap gap-2 text-xs">
+                        <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded">DM: ${h.dm}%</span>
+                        <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded">OM: ${h.om}%</span>
+                        <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded">CP: ${h.cp}%</span>
+                        <span class="px-2 py-1 bg-orange-100 text-orange-700 rounded">NDF: ${h.ndf}%</span>
+                        <span class="px-2 py-1 bg-rose-100 text-rose-700 rounded">ADF: ${h.adf}%</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function deleteHistory(index) {
+            history.splice(index, 1);
+            localStorage.setItem('digestHistory', JSON.stringify(history));
+            renderHistory();
+        }
+
+        function clearHistory() {
+            if (confirm('Bạn có chắc muốn xóa toàn bộ lịch sử?')) {
+                history = [];
+                localStorage.removeItem('digestHistory');
+                renderHistory();
+            }
+        }
+
+        function exportResults() {
+            const table = document.getElementById('result_table');
+            let csv = 'Chỉ tiêu,Ăn vào (g),Thải ra (g),Tiêu hóa (g),Tỷ lệ (%)\n';
+            
+            table.querySelectorAll('tr').forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length > 0) {
+                    const rowData = [];
+                    cells.forEach((cell, i) => {
+                        if (i < 5) rowData.push(cell.textContent.trim());
+                    });
+                    csv += rowData.join(',') + '\n';
+                }
+            });
+
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'ty_le_tieu_hoa_' + new Date().toISOString().slice(0,10) + '.csv';
+            link.click();
+        }
+
+        function printResults() {
+            window.print();
+        }
+
+        // Initialize
+        renderHistory();
+    </script>
+</body>
+</html>
